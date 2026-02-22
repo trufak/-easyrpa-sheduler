@@ -1,0 +1,42 @@
+{
+  "name": "@easyrpa/sheduler",
+  "version": "1.0.0",
+  "description": "Sheduler for easy rpa",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trufak/-easyrpa-sheduler.git"
+  },
+  "author": "trufak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/trufak/-easyrpa-sheduler/issues"
+  },
+  "homepage": "https://github.com/trufak/-easyrpa-sheduler#readme",
+  "files": [
+    "dist",
+    "package.json",
+    "LICENSE, README.md"
+  ],
+  "dependencies": {
+    "@breejs/ts-worker": "^2.0.0",
+    "@easyrpa/script-creator": "^1.0.1",
+    "bree": "^9.2.9",
+    "crypto-ts": "^1.0.2"
+  },
+    "keywords": [
+    "easyrpa",
+    "sheduler"
+  ],
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
