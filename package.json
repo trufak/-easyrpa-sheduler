@@ -1,6 +1,6 @@
 {
   "name": "@easyrpa/sheduler",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Sheduler for easy rpa",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@breejs/ts-worker": "^2.0.0",
-    "@easyrpa/script-creator": "^1.0.1",
+    "@easyrpa/script-creator": "^1.0.2",
     "bree": "^9.2.9",
     "crypto-ts": "^1.0.2"
   },
