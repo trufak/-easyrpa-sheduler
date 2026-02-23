@@ -5,11 +5,8 @@ import path from "path";
 import fsPromises from "fs/promises";
 import { WordArray } from "crypto-ts/src/lib/WordArray";
 import { AES, enc } from "crypto-ts";
-import { IScriptCreator, ScriptCreator } from "@easyrpa/script-creator";
-import { CollectionType, ExternalDataDefaultFlowType } from "@easyrpa/script-creator/dist/types";
-
-import { ShedulerMessageType, ShedulerLogger, JobOptionsType, IntervalsJob } from "./types";
-import { IJob, Job } from "./Job";
+import { type WorkerOptions } from "node:worker_threads";
+import { IScriptCreator, ScriptCreator, CollectionType, ExternalDataDefaultFlowType } from "@easyrpa/script-creator";
 
 export interface ISheduler {
   //путь к скриптам задач
@@ -215,10 +212,154 @@ export class Sheduler implements ISheduler {
   }
 }
 
+//Job
+export interface IJob {
+  name: string;
+  path: string;
+  interval: number | string;
+  date?: Date;
+  cron?: string;
+  worker?: Partial<WorkerOptions>;
+  externalData: JobType;
+}
+
+export class Job implements IJob {
+  name: string;
+  path: string;
+  interval: number | string;
+  date?: Date;
+  cron?: string;
+  worker?: Partial<WorkerOptions>;
+  _pythonPath: string;
+  _defaultScriptName: string;
+
+  constructor(
+    jobOption: JobOptionsType,
+    pathJobs: string,
+    pythonPath: string,
+    defaultScriptName?: string
+  ) {
+    this.name = jobOption._id;
+    this.path = path.join(process.cwd(), "assets", "scriptFlow.js");
+    this.interval = jobOption.interval || 0;
+    this._pythonPath = pythonPath;
+    this._defaultScriptName = defaultScriptName || 'script.py';
+    this.init(jobOption, pathJobs);
+  }
+
+  get externalData(): JobType {
+    return {
+      name: this.name,
+      path: this.path,
+      interval: this.interval,
+      date: this.date,
+      cron: this.cron,
+      worker: this.worker,
+    };
+  }
+
+  private init(jobOption: JobOptionsType, pathJobs: string): void {
+    //определение даты начала
+    const initialStartDateTime: Date = new Date(jobOption.startDateTime);
+    const now: Date = new Date();
+    const reserveSeconds: number = 10;
+    let dateStart: Date | undefined =
+      initialStartDateTime >
+        new Date(now.setSeconds(now.getSeconds() + reserveSeconds))
+        ? initialStartDateTime
+        : undefined;
+    if (dateStart) {
+      this.date = dateStart;
+    }
+    this.worker = {
+      workerData: {
+        scriptPythonPath: path.join(
+          pathJobs,
+          jobOption._id,
+          this._defaultScriptName
+        ),
+        pythonPath: this._pythonPath,
+      },
+    };
+  }
+}
+
+//types
+export type JobOptionsType = {
+  _id: string,
+  name: string,
+  status: JobStatus,
+  logs: JobLogType[];
+  flow: JobFlowType,
+  startDateTime: string,
+  interval?: string;
+  intervalMeasur?: IntervalsJob;
+  intervalValue?: number;
+  weekDays?: number[];
+  yearMonths?: number[];
+  endDateTime?: string,
+}
+
+export type JobType = {
+  //имя задачи
+  name: string;
+  //путь до скрипта задачи
+  path: string;
+  //интервал запуска задачи
+  interval: number | string;
+  //дата запуска задачи
+  date?: Date;
+  //строка с параметрами запуска задачи в формате Cron
+  cron?: string;
+  //настройки потока
+  worker?: Partial<WorkerOptions>;
+};
+
+export enum JobStatus {
+  STOPPED = 'stopped',
+  RUNNING = 'running',
+  WORKING = 'working',
+  ERROR = 'error',
+}
+
+export type JobLogType = {
+  category: 'run' | 'stop' | 'message' | 'workerCreated' | 'workerDeleted';
+  date: string;
+  message?: string;
+}
+
+export type JobFlowType = {
+  name: string;
+  content: string;
+}
+
+export enum IntervalsJob {
+  SECONDS = 'seconds',
+  MINUTES = 'minutes',
+  HOURS = 'hours',
+  DAYS = 'days',
+  MONTHS = 'months'
+}
+
+export type ShedulerLogger = {
+  //логирование информационного сообщения
+  info(...args: string[]): void;
+  //дополнительная реализация логирования информационного сообщения
+  log(...args: string[]): void;
+  //логирование сообщения об ошибке
+  error(...args: string[]): void;
+  //логирование сообщения о предупреждении
+  warn(...args: string[]): void;
+}
+
+export type ShedulerMessageType = {
+  name: string,
+  message: unknown
+}
 
 //utils
 export const months: string[] = [
-  'January' ,
+  'January',
   'February',
   'March',
   'April',

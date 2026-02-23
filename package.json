@@ -1,13 +1,13 @@
 {
   "name": "@easyrpa/sheduler",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Sheduler for easy rpa",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "rimraf dist && tsc"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "bree": "^9.2.9",
     "crypto-ts": "^1.0.2"
   },
-    "keywords": [
+  "keywords": [
     "easyrpa",
     "sheduler"
   ],
@@ -38,5 +38,8 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "rimraf": "^6.1.3"
   }
 }
