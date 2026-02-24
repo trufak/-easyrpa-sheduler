@@ -11,8 +11,6 @@ import { IScriptCreator, ScriptCreator, CollectionType, ExternalDataDefaultFlowT
 export interface ISheduler {
   //путь к скриптам задач
   pathJobs: string;
-  //коллекции
-  collections: CollectionType[];
   //запустить список задач
   runJobs(jobsOptions: JobOptionsType[]): Promise<string[] | undefined>;
   //запустить одну задачу
@@ -46,13 +44,13 @@ export class Sheduler implements ISheduler {
   _sheduler: Bree;
   _encriptKey: string;
   _pythonPath: string;
-  _collections: CollectionType[];
   _onWorkerCreated?: (id: string) => void | Promise<void>;
   _onWorkerDeleted?: (id: string) => void | Promise<void>;
+  handleGetCollections: ()=>Promise<CollectionType[]>;
 
   constructor(
     config: ShedulerConfig,
-    collections?: CollectionType[],
+    handleGetCollections: ()=>Promise<CollectionType[]>,
   ) {
     this._logger = config.logger;
     this._encriptKey = config.encriptKey;
@@ -73,17 +71,9 @@ export class Sheduler implements ISheduler {
     this.pathJobs = config.pathJobs;
     this._onWorkerCreated = config.onWorkerCreated;
     this._onWorkerDeleted = config.onWorkerDeleted;
-    this._collections = collections || [];
+    this.handleGetCollections = handleGetCollections;
     this.prepareJobsDirectory();
     this.addWorkerListeners();
-  }
-
-  get collections(): CollectionType[] {
-    return this._collections;
-  }
-
-  set collections(cols: CollectionType[]) {
-    this._collections = cols;
   }
 
   //Подготовка директории со скриптами задач
@@ -117,7 +107,7 @@ export class Sheduler implements ISheduler {
       decryptedData.toString(enc.Utf8)
     );
     // создаем python скрипт для схемы
-    const scriptCreator: IScriptCreator = new ScriptCreator(this._collections);
+    const scriptCreator: IScriptCreator = new ScriptCreator(this.handleGetCollections);
     const scriptPath: string | undefined = await scriptCreator.createScript(
       path.join(this.pathJobs, jobOptions._id),
       dataFlow.nodes,
