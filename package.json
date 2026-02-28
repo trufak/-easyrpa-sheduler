@@ -1,10 +1,9 @@
 {
   "name": "@easyrpa/sheduler",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "Sheduler for easy rpa",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf dist && tsc"
@@ -26,7 +25,7 @@
   ],
   "dependencies": {
     "@breejs/ts-worker": "^2.0.0",
-    "@easyrpa/script-creator": "^1.0.9",
+    "@easyrpa/script-creator": "^1.0.11",
     "bree": "^9.2.9",
     "crypto-ts": "^1.0.2"
   },
