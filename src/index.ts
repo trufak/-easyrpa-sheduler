@@ -32,6 +32,7 @@ export type ShedulerConfig = {
   encriptKey: string;
   pathJobs: string;
   pythonPath: string;
+  scriptJobPath: string;
   errorHandler?: (error: any) => void | Promise<void>;
   workerMessageHandler?: (message: ShedulerMessageType) => void | Promise<void>;
   onWorkerCreated?: (id: string) => void | Promise<void>;
@@ -44,6 +45,7 @@ export class Sheduler implements ISheduler {
   _sheduler: Bree;
   _encriptKey: string;
   _pythonPath: string;
+  _scriptJobPath: string;
   _onWorkerCreated?: (id: string) => void | Promise<void>;
   _onWorkerDeleted?: (id: string) => void | Promise<void>;
   handleGetCollections: () => Promise<CollectionType[]>;
@@ -55,6 +57,7 @@ export class Sheduler implements ISheduler {
     this._logger = config.logger;
     this._encriptKey = config.encriptKey;
     this._pythonPath = config.pythonPath;
+    this._scriptJobPath = config.scriptJobPath;
     this._sheduler = new Bree({
       root: false,
       jobs: [],
@@ -142,7 +145,7 @@ export class Sheduler implements ISheduler {
       const now: Date = new Date();
       if (initialEndDateTime < now) return;
     }
-    const job: IJob = new Job(jobOptions, this.pathJobs, this._pythonPath);
+    const job: IJob = new Job(jobOptions, this.pathJobs, this._pythonPath, this._scriptJobPath);
     await this._sheduler.add(job.externalData);
     await this._sheduler.start(jobOptions._id);
     return job.name;
@@ -164,7 +167,7 @@ export class Sheduler implements ISheduler {
       })
       .map(
         (jobOptions: JobOptionsType) =>
-          new Job(jobOptions, this.pathJobs, this._pythonPath)
+          new Job(jobOptions, this.pathJobs, this._pythonPath, this._scriptJobPath)
       );
     if (jobs.length == 0) {
       return;
@@ -224,10 +227,11 @@ export class Job implements IJob {
     jobOption: JobOptionsType,
     pathJobs: string,
     pythonPath: string,
+    scriptJobPath: string,
     defaultScriptName?: string
   ) {
     this.name = jobOption._id;
-    this.path = path.join(process.cwd(), "assets", "scriptFlow.js");
+    this.path = scriptJobPath;
     this.interval = jobOption.interval || 0;
     this._pythonPath = pythonPath;
     this._defaultScriptName = defaultScriptName || 'script.py';
