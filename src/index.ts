@@ -18,11 +18,11 @@ export interface ISheduler {
   //остановить одну задачу
   stopJob(id: string): Promise<string | undefined>;
   //выйти из процесса выполнения задачи
-  postMessageCancelWorker(jobOptions: JobOptionsType): void;
+  postMessageCancelWorker(id: string): void;
   //создать файл скрипта задачи
   createPhytonScript(jobOptions: JobOptionsType): Promise<string | undefined>;
   //удалить файл скрипта задачи
-  deletePhytonScript(jobOptions: JobOptionsType): Promise<string>;
+  deletePhytonScript(id: string): Promise<string>;
   //создать файлы скриптов для списка задач
   createPhytonScripts(jobsOptions: JobOptionsType[]): Promise<string[]>;
 }
@@ -129,8 +129,8 @@ export class Sheduler implements ISheduler {
     return pathesScripts;
   }
   //Удаление директории одного скрипта
-  async deletePhytonScript(jobOptions: JobOptionsType): Promise<string> {
-    const pathScript: string = path.join(this.pathJobs, jobOptions._id);
+  async deletePhytonScript(id: string): Promise<string> {
+    const pathScript: string = path.join(this.pathJobs, id);
     await fsPromises.rm(pathScript, { recursive: true });
     return pathScript;
   }
@@ -184,8 +184,8 @@ export class Sheduler implements ISheduler {
     return id;
   }
   //Принудительный останов запущенного процесса
-  postMessageCancelWorker(jobOptions: JobOptionsType): void {
-    const worker = this._sheduler.workers.get(jobOptions._id);
+  postMessageCancelWorker(id: string): void {
+    const worker = this._sheduler.workers.get(id);
     worker?.postMessage({ cancel: true });
   }
   //Подключение слушателей worker
