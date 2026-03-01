@@ -16,7 +16,7 @@ export interface ISheduler {
   //запустить одну задачу
   runJob(jobOptions: JobOptionsType): Promise<string | undefined>;
   //остановить одну задачу
-  stopJob(jobOptions: JobOptionsType): Promise<string | undefined>;
+  stopJob(id: string): Promise<string | undefined>;
   //выйти из процесса выполнения задачи
   postMessageCancelWorker(jobOptions: JobOptionsType): void;
   //создать файл скрипта задачи
@@ -46,11 +46,11 @@ export class Sheduler implements ISheduler {
   _pythonPath: string;
   _onWorkerCreated?: (id: string) => void | Promise<void>;
   _onWorkerDeleted?: (id: string) => void | Promise<void>;
-  handleGetCollections: ()=>Promise<CollectionType[]>;
+  handleGetCollections: () => Promise<CollectionType[]>;
 
   constructor(
     config: ShedulerConfig,
-    handleGetCollections: ()=>Promise<CollectionType[]>,
+    handleGetCollections: () => Promise<CollectionType[]>,
   ) {
     this._logger = config.logger;
     this._encriptKey = config.encriptKey;
@@ -174,17 +174,14 @@ export class Sheduler implements ISheduler {
     return jobs.map((job: IJob) => job.name);
   }
   //Останов задачи
-  async stopJob(jobOptions: JobOptionsType): Promise<string | undefined> {
-    if (jobOptions._id) {
-      await this._sheduler.stop(jobOptions._id);
-      await this._sheduler.remove(jobOptions._id);
-      //проверка удаления
-      if (this._sheduler.workers.has(jobOptions._id)) {
-        return;
-      }
-      return jobOptions._id;
+  async stopJob(id: string): Promise<string | undefined> {
+    await this._sheduler.stop(id);
+    await this._sheduler.remove(id);
+    //проверка удаления
+    if (this._sheduler.workers.has(id)) {
+      return;
     }
-    return;
+    return id;
   }
   //Принудительный останов запущенного процесса
   postMessageCancelWorker(jobOptions: JobOptionsType): void {
